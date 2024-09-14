@@ -218,26 +218,6 @@ function Identify:Menu(equipped)
                 if effect.id > -1 then
                     if not self:isKnown(effect) then
                         local item, icon, label = self:createItemList(stack.object, itemList, counter)
-                    -- if not bsIdentify[effect.id] then
-                        -- ---@diagnostic disable-next-line: undefined-field
-                        -- local width = tes3ui.textLayout.getTextExtent({ text = stack.object.name })
-                        -- local item = itemList:createImage { id = tes3ui.registerID("item " .. counter), path = "Textures\\menu_icon_equip.tga" }
-                        -- item.borderTop = 5
-                        -- item.borderBottom = 5
-                        -- item.height = 40
-                        -- item.width = width + 80
-                        -- item.color = { 0, 0, 0 }
-
-                        -- local border = item:createImage { id = tes3ui.registerID("border"), path = "Textures\\menu_icon_equip.tga" }
-                        -- border.color = { 0, 0, 0 }
-
-                        -- local icon = border:createImage({ id = tes3ui.registerID("icon"), path = "Icons\\" .. stack.object.icon })
-                        -- icon.borderAllSides = 6
-                        -- icon.color = {.35,.35,.35}---Unsure about adding color tint
-
-                        -- local label = item:createLabel({ id = tes3ui.registerID("label"), text = stack.object.name })
-                        -- label.borderTop = 10
-                        -- label.color = { 0, 0, 0 }
 
                         item:register(tes3.uiEvent.mouseOver, function(e)
                             tes3ui.createTooltipMenu { item = stack.object, itemData = stack.variables }
@@ -255,22 +235,18 @@ function Identify:Menu(equipped)
                                 self:getData().condition = self:getData().condition - 1
                                 uses.text = "Uses: " .. self.quillCondition() ---Update Uses Text
                                 if self:isKnown(effect) then
-                                -- if bsIdentify[effect.id] then
                                     if enchant.effects[i + iter].id ~= -1 then
                                         ---If the first effect is known move to the next
                                         self:learn(enchant.effects[i+iter].id)
-                                        -- bsIdentify[enchant.effects[i+iter].id] = true
                                         iter = iter + 1
                                     end
                                 else
                                     self:learn(effect.id)
-                                    -- bsIdentify[effect.id] = true
                                 end
                                 local destroy = true ---Track if all effects are known to destroy item element
                                 for _, effect in ipairs(enchant.effects) do
                                     if effect.id ~= -1 then
                                         destroy = true
-                                        -- if not bsIdentify[effect.id] then destroy = false end
                                         if not self:isKnown(effect) then destroy = false end
                                     end
                                 end
