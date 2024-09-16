@@ -1,11 +1,12 @@
 -- local cfg = require("BeefStranger.Identify.config")
 local bs = require("BeefStranger.Identify.common")
 local ui = require("BeefStranger.Identify.identifyMenu")
-local item = require("BeefStranger.Identify.items")
+local Item = require("BeefStranger.Identify.items")
 
 
 event.register("initialized", function()
-    item:createQuillObj()
+    Item:createQuillObj()
+    Item:distributeQuills()
     print("[MWSE:Identify] initialized")
 end)
 

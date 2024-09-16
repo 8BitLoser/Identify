@@ -1,11 +1,10 @@
 local Item = require("BeefStranger.Identify.items")
-local bs = require("BeefStranger.Identify.common")
+local common = require("BeefStranger.Identify.common")
 local cfg = require("BeefStranger.Identify.config")
 
 
 ---TODO: 
----1: Scroll Options|Auto Learn when purchased
----2: Add Quill to Merchants/Leveled Lists
+---1: Scroll Options|
 ---3: Alternate Menu for people not using my UI mod
 ---4: Consider Obfuscating the Item name aswell (configurable)
 ---
@@ -79,7 +78,7 @@ function Identify:quillBreak()
         self:QuillIcon().visible = false
         self:Uses().visible = false
         tes3.removeItem{reference = tes3.player, item = self:getObj(), itemData = self:getData(), playSound = false}
-        tes3.playSound{sound = bs.sounds.Pack}
+        tes3.playSound{sound = common.sounds.Pack}
         self:get():updateLayout()
     end
 end
@@ -116,18 +115,24 @@ function Identify:createItemList(object, itemList, counter)
     item.borderBottom = 5
     item.height = 40
     item.width = width + 80
-    item.color = { 0, 0, 0 }
+    -- item.color = { 0, 0, 0 }
 
     local border = item:createImage { id = tes3ui.registerID("border"), path = "Textures\\menu_icon_equip.tga" }
-    border.color = { 0, 0, 0 }
+    -- border.color = { 0, 0, 0 }
 
     local icon = border:createImage({ id = tes3ui.registerID("icon"), path = "Icons\\" .. object.icon })
     icon.borderAllSides = 6
-    icon.color = { .35, .35, .35 } ---Unsure about adding color tint
+    -- icon.color = { .35, .35, .35 } ---Unsure about adding color tint
 
     local label = item:createLabel({ id = tes3ui.registerID("label"), text = object.name })
     label.borderTop = 10
-    label.color = { 0, 0, 0 }
+    -- label.color = { 0, 0, 0 }
+    label.color = (cfg.scrollMenu and {0,0,0}) or tes3ui.getPalette(tes3.palette.normalColor)
+
+    Identify.border = border
+    Identify.item = item
+    Identify.icon = icon
+    Identify.label = label
     return item, icon, label
 end
 
@@ -140,7 +145,7 @@ function Identify:Menu(equipped)
     main.autoWidth = false
     main.width = 500
     main.height = 550
-    main.alpha = 0
+    -- main.alpha = 0
 
     local header = main:createBlock{id = "Header"}
     header.autoHeight = true
@@ -154,7 +159,7 @@ function Identify:Menu(equipped)
     quillBlock.borderTop = 20
 
     local quillSelect = quillBlock:createImage({id = "Quill Select", path = "Textures\\menu_icon_equip.tga"})
-    quillSelect.color = {0,0,0}
+    -- quillSelect.color = {0,0,0}
     self.setProps(equipped.item, equipped.itemData)
 
     quillSelect:register("mouseOver", function (e)
@@ -167,7 +172,7 @@ function Identify:Menu(equipped)
     quillIcon.borderAllSides = 6
 
     local uses = quillBlock:createLabel{id = "Uses", text = "Uses: "..self.quillCondition()}
-    uses.color = {0,0,0}
+    -- uses.color = {0,0,0}
 
     quillSelect:register("mouseClick", function()
         tes3ui.showInventorySelectMenu {
@@ -194,19 +199,19 @@ function Identify:Menu(equipped)
         }
     end)
     local headerLabel = header:createLabel{id = "HeaderLabel", text = "Identify"}
-    headerLabel.absolutePosAlignX = 0.45
-    headerLabel.borderTop = 35
-    headerLabel.color = {0,0,0}
+    -- headerLabel.absolutePosAlignX = 0.45
+    -- headerLabel.borderTop = 35
+    -- headerLabel.color = {0,0,0}
 
     local itemList = main:createVerticalScrollPane({id = tes3ui.registerID("itemList")})
-    itemList.parent.contentPath = "Menu_Scroll.NIF"
-    itemList.parent.height = 512
-    itemList.parent.width = 512
-    itemList.parent.scaleMode = true
-    itemList.contentPath = ""
-    itemList.paddingBottom = 15
-    itemList.paddingLeft = 40
-    itemList.paddingRight = 40
+    -- itemList.parent.contentPath = "Menu_Scroll.NIF"
+    -- itemList.parent.height = 512
+    -- itemList.parent.width = 512
+    -- itemList.parent.scaleMode = true
+    -- itemList.contentPath = ""
+    -- itemList.paddingBottom = 15
+    -- itemList.paddingLeft = 40
+    -- itemList.paddingRight = 40
 
     local counter = 0
     local iter = 1
@@ -218,15 +223,21 @@ function Identify:Menu(equipped)
                 if effect.id > -1 then
                     if not self:isKnown(effect) then
                         local item, icon, label = self:createItemList(stack.object, itemList, counter)
+                        
 
                         item:register(tes3.uiEvent.mouseOver, function(e)
                             tes3ui.createTooltipMenu { item = stack.object, itemData = stack.variables }
-                            label.color = tes3ui.getPalette(tes3.palette.normalColor)
+                            label.color = (cfg.scrollMenu and tes3ui.getPalette(tes3.palette.normalColor)) or tes3ui.getPalette(tes3.palette.normalOverColor)
                             e.source:getTopLevelMenu():updateLayout()
                         end)
 
                         item:register(tes3.uiEvent.mouseLeave, function(e)
-                            label.color = { 0, 0, 0 }
+                            label.color = (cfg.scrollMenu and {0,0,0}) or tes3ui.getPalette(tes3.palette.normalColor)
+                            -- if cfg.scrollMenu then
+                            --     label.color = { 0, 0, 0 }
+                            -- else
+                            --     label.color = tes3ui.getPalette(tes3.palette.normalColor)
+                            -- end
                             e.source:getTopLevelMenu():updateLayout()
                         end)
 
@@ -251,12 +262,12 @@ function Identify:Menu(equipped)
                                     end
                                 end
                                 if destroy then e.source:destroy() iter = 1 end
-                                tes3.playSound { sound = bs.sounds.book_page2}
+                                tes3.playSound { sound = common.sounds.book_page2}
 
                                 ---Make uses update aswell
                                 if self.quillCondition() == 0 then Identify:quillBreak() end
                             else
-                                tes3.playSound{sound = bs.sounds.enchant_fail}
+                                tes3.playSound{sound = common.sounds.enchant_fail}
                             end
                             itemList.widget:contentsChanged()
                             main:updateLayout()
@@ -272,12 +283,42 @@ function Identify:Menu(equipped)
     end
 
     local close = main:createButton({ id = "close", text = "Cancel" })
-    close.borderLeft = 20
-    close.borderBottom = 10
+    close.borderTop = 6
+    close.borderBottom = 6
+    -- close.borderLeft = 20
+    -- close.borderBottom = 10
     close:register(tes3.uiEvent.mouseClick, function (e)
         e.source:getTopLevelMenu():destroy()
         tes3ui.leaveMenuMode()
     end)
+
+    if cfg.scrollMenu then
+        main.alpha = 0
+        
+        itemList.parent.contentPath = "Menu_Scroll.NIF"
+        itemList.parent.height = 512
+        itemList.parent.width = 512
+        itemList.parent.scaleMode = true
+        itemList.contentPath = ""
+        itemList.paddingBottom = 15
+        itemList.paddingLeft = 40
+        itemList.paddingRight = 40
+
+        headerLabel.absolutePosAlignX = 0.45
+        headerLabel.borderTop = 35
+        headerLabel.color = {0,0,0}
+
+        Identify.item.color = { 0, 0, 0 }
+        Identify.border.color = { 0, 0, 0 }
+        Identify.icon.color = { .35, .35, .35 } ---Unsure about adding color tint
+        Identify.label.color = { 0, 0, 0 }
+
+        quillSelect.color = {0,0,0}
+        uses.color = {0,0,0}
+
+        close.borderLeft = 20
+        close.borderBottom = 10
+    end
 
     main:updateLayout()
     headerLabel.sceneNode.scale = 2 ---wacky hacky
@@ -287,6 +328,9 @@ end
 
 --- @param e equipEventData
 function Identify.equip(e)
+    if cfg.debug then
+        return
+    end
     if e.item.id == Item.ID then
         if not e.itemData then
             local itemData
@@ -312,18 +356,22 @@ function Identify.tooltips(e)
     if e.object.objectType == tes3.objectType.book then return end
 
     if enchant then
-        if enchant.modified then bsIdentify[enchant.id] = true end
+        if enchant.modified then
+            common:learn(enchant)
+            -- bsIdentify[enchant.id] = true
+        end
 
         for index, effect in ipairs(enchant.effects) do
             if effect.id > -1 then
-                if not bsIdentify[effect.id] then
+                if not Identify:isKnown(effect) then
+                -- if not bsIdentify[effect.id] then
                     if Help:Charge() then Help:Charge():findChild("PartFillbar_text_ptr").text = "???/???" end
                     if Help:child("ChargeCost") then Help:child("ChargeCost").font = 2 end
                 end
 
                 for child, enchantTip in pairs(e.tooltip:findChild("HelpMenu_enchantmentContainer").children) do
                     if index == child then
-                        if not bsIdentify[effect.id] then
+                        if not Identify:isKnown(effect) then
                             enchantTip:findChild(Help.labelId).font = 2
                             enchantTip:findChild(Help.labelId).parent:createBlock{id = "effectMarker"}
                             enchantTip:findChild("image").contentPath = Identify.unknownIcon

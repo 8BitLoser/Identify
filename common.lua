@@ -1,5 +1,21 @@
 local this = {}
 
+this.playerData = nil
+
+---@return table bsIdentify
+-- function this.data() return tes3.player.data.bsIdentify or {} end
+
+---@param enchantment tes3enchantment
+function this.learnAll(enchantment)
+    for _, effect in ipairs(enchantment.effects) do
+        tes3.player.data.bsIdentify[effect.id] = true
+    end
+end
+
+function this:learn(effect)
+    self.playerData[effect.id] = true
+end
+
 function this.inspect(table)
     local inspect = require("inspect").inspect
     local bsF = debug.getinfo(1, "nSl")
@@ -8,6 +24,10 @@ function this.inspect(table)
     mwse.log("[Source: %s, Line: %d]", bsC.short_src, bsC.currentline)
     mwse.log("%s", inspect(table))
 end
+
+event.register(tes3.event.loaded, function (e)
+    this.playerData = tes3.player.data.bsIdentify or {}
+end)
 
 this.sounds = {
     alitMOAN = "alitMOAN",

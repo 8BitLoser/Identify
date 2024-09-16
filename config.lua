@@ -2,6 +2,8 @@ local configPath = "Identify"
 ---@class bsIdentifyConfig<K, V>: { [K]: V }
 local defaults = {
     quillCondition = 10,
+    debug = false,
+    scrollMenu = false,
     key = { --Keycode to trigger menu
         keyCode = tes3.scanCode.p,
         isShiftDown = false,
@@ -21,10 +23,13 @@ local function registerModConfig()
     local settings = template:createPage({ label = "Settings" })
     settings.showReset = true
 
+    settings:createYesNoButton{configKey = "scrollMenu", label = "Scroll Menu"}
+    settings:createYesNoButton{configKey = "debug"}
+
     settings:createSlider({
-        label = "Example Slider",
-        configKey = "exampleSlider",
-        min = 0, max = 10, step = 0.01, jump = 0.10, decimalPlaces = 2,
+        label = "Magic Quill Condition",
+        configKey = "quillCondition",
+        min = 1, max = 10, step = 1, jump = 1
     })
     template:register()
 end
